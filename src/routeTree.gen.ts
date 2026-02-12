@@ -9,38 +9,276 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as Drive_driveRouteImport } from './routes/drive/__drive'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as ApiJwksRouteImport } from './routes/api/jwks'
+import { Route as Drive_driveIndexRouteImport } from './routes/drive/__drive/index'
+import { Route as Drive_driveStarsRouteImport } from './routes/drive/__drive/stars'
+import { Route as Drive_driveRecentRouteImport } from './routes/drive/__drive/recent'
+import { Route as Drive_driveMyDriveRouteImport } from './routes/drive/__drive/my-drive'
+import { Route as Drive_driveBinRouteImport } from './routes/drive/__drive/bin'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as Drive_driveSharedTokenIndexRouteImport } from './routes/drive/__drive/shared/$token/index'
+import { Route as Drive_driveFolderFolderidIndexRouteImport } from './routes/drive/__drive/folder/$folderid/index'
+import { Route as Drive_driveFileFileIdIndexRouteImport } from './routes/drive/__drive/file/$fileId/index'
+import { Route as Drive_driveFolderFolderidFlowRouteImport } from './routes/drive/__drive/folder/$folderid/flow'
+import { Route as Drive_driveSharedTokenFolderFolderIdRouteImport } from './routes/drive/__drive/shared/$token/folder/$folderId'
+import { Route as Drive_driveSharedTokenFileFileIdRouteImport } from './routes/drive/__drive/shared/$token/file/$fileId'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Drive_driveRoute = Drive_driveRouteImport.update({
+  id: '/drive/__drive',
+  path: '/drive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/auth/forgot-password',
+  path: '/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiJwksRoute = ApiJwksRouteImport.update({
+  id: '/api/jwks',
+  path: '/api/jwks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Drive_driveIndexRoute = Drive_driveIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Drive_driveRoute,
+} as any)
+const Drive_driveStarsRoute = Drive_driveStarsRouteImport.update({
+  id: '/stars',
+  path: '/stars',
+  getParentRoute: () => Drive_driveRoute,
+} as any)
+const Drive_driveRecentRoute = Drive_driveRecentRouteImport.update({
+  id: '/recent',
+  path: '/recent',
+  getParentRoute: () => Drive_driveRoute,
+} as any)
+const Drive_driveMyDriveRoute = Drive_driveMyDriveRouteImport.update({
+  id: '/my-drive',
+  path: '/my-drive',
+  getParentRoute: () => Drive_driveRoute,
+} as any)
+const Drive_driveBinRoute = Drive_driveBinRouteImport.update({
+  id: '/bin',
+  path: '/bin',
+  getParentRoute: () => Drive_driveRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Drive_driveSharedTokenIndexRoute =
+  Drive_driveSharedTokenIndexRouteImport.update({
+    id: '/shared/$token/',
+    path: '/shared/$token/',
+    getParentRoute: () => Drive_driveRoute,
+  } as any)
+const Drive_driveFolderFolderidIndexRoute =
+  Drive_driveFolderFolderidIndexRouteImport.update({
+    id: '/folder/$folderid/',
+    path: '/folder/$folderid/',
+    getParentRoute: () => Drive_driveRoute,
+  } as any)
+const Drive_driveFileFileIdIndexRoute =
+  Drive_driveFileFileIdIndexRouteImport.update({
+    id: '/file/$fileId/',
+    path: '/file/$fileId/',
+    getParentRoute: () => Drive_driveRoute,
+  } as any)
+const Drive_driveFolderFolderidFlowRoute =
+  Drive_driveFolderFolderidFlowRouteImport.update({
+    id: '/folder/$folderid/flow',
+    path: '/folder/$folderid/flow',
+    getParentRoute: () => Drive_driveRoute,
+  } as any)
+const Drive_driveSharedTokenFolderFolderIdRoute =
+  Drive_driveSharedTokenFolderFolderIdRouteImport.update({
+    id: '/shared/$token/folder/$folderId',
+    path: '/shared/$token/folder/$folderId',
+    getParentRoute: () => Drive_driveRoute,
+  } as any)
+const Drive_driveSharedTokenFileFileIdRoute =
+  Drive_driveSharedTokenFileFileIdRouteImport.update({
+    id: '/shared/$token/file/$fileId',
+    path: '/shared/$token/file/$fileId',
+    getParentRoute: () => Drive_driveRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/api/jwks': typeof ApiJwksRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/drive': typeof Drive_driveRouteWithChildren
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/drive/bin': typeof Drive_driveBinRoute
+  '/drive/my-drive': typeof Drive_driveMyDriveRoute
+  '/drive/recent': typeof Drive_driveRecentRoute
+  '/drive/stars': typeof Drive_driveStarsRoute
+  '/drive/': typeof Drive_driveIndexRoute
+  '/drive/folder/$folderid/flow': typeof Drive_driveFolderFolderidFlowRoute
+  '/drive/file/$fileId/': typeof Drive_driveFileFileIdIndexRoute
+  '/drive/folder/$folderid/': typeof Drive_driveFolderFolderidIndexRoute
+  '/drive/shared/$token/': typeof Drive_driveSharedTokenIndexRoute
+  '/drive/shared/$token/file/$fileId': typeof Drive_driveSharedTokenFileFileIdRoute
+  '/drive/shared/$token/folder/$folderId': typeof Drive_driveSharedTokenFolderFolderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/api/jwks': typeof ApiJwksRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/drive/bin': typeof Drive_driveBinRoute
+  '/drive/my-drive': typeof Drive_driveMyDriveRoute
+  '/drive/recent': typeof Drive_driveRecentRoute
+  '/drive/stars': typeof Drive_driveStarsRoute
+  '/drive': typeof Drive_driveIndexRoute
+  '/drive/folder/$folderid/flow': typeof Drive_driveFolderFolderidFlowRoute
+  '/drive/file/$fileId': typeof Drive_driveFileFileIdIndexRoute
+  '/drive/folder/$folderid': typeof Drive_driveFolderFolderidIndexRoute
+  '/drive/shared/$token': typeof Drive_driveSharedTokenIndexRoute
+  '/drive/shared/$token/file/$fileId': typeof Drive_driveSharedTokenFileFileIdRoute
+  '/drive/shared/$token/folder/$folderId': typeof Drive_driveSharedTokenFolderFolderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/api/jwks': typeof ApiJwksRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/drive/__drive': typeof Drive_driveRouteWithChildren
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/drive/__drive/bin': typeof Drive_driveBinRoute
+  '/drive/__drive/my-drive': typeof Drive_driveMyDriveRoute
+  '/drive/__drive/recent': typeof Drive_driveRecentRoute
+  '/drive/__drive/stars': typeof Drive_driveStarsRoute
+  '/drive/__drive/': typeof Drive_driveIndexRoute
+  '/drive/__drive/folder/$folderid/flow': typeof Drive_driveFolderFolderidFlowRoute
+  '/drive/__drive/file/$fileId/': typeof Drive_driveFileFileIdIndexRoute
+  '/drive/__drive/folder/$folderid/': typeof Drive_driveFolderFolderidIndexRoute
+  '/drive/__drive/shared/$token/': typeof Drive_driveSharedTokenIndexRoute
+  '/drive/__drive/shared/$token/file/$fileId': typeof Drive_driveSharedTokenFileFileIdRoute
+  '/drive/__drive/shared/$token/folder/$folderId': typeof Drive_driveSharedTokenFolderFolderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/api/jwks'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/drive'
+    | '/api/auth/$'
+    | '/drive/bin'
+    | '/drive/my-drive'
+    | '/drive/recent'
+    | '/drive/stars'
+    | '/drive/'
+    | '/drive/folder/$folderid/flow'
+    | '/drive/file/$fileId/'
+    | '/drive/folder/$folderid/'
+    | '/drive/shared/$token/'
+    | '/drive/shared/$token/file/$fileId'
+    | '/drive/shared/$token/folder/$folderId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/api/jwks'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/api/auth/$'
+    | '/drive/bin'
+    | '/drive/my-drive'
+    | '/drive/recent'
+    | '/drive/stars'
+    | '/drive'
+    | '/drive/folder/$folderid/flow'
+    | '/drive/file/$fileId'
+    | '/drive/folder/$folderid'
+    | '/drive/shared/$token'
+    | '/drive/shared/$token/file/$fileId'
+    | '/drive/shared/$token/folder/$folderId'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/api/jwks'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/drive/__drive'
+    | '/api/auth/$'
+    | '/drive/__drive/bin'
+    | '/drive/__drive/my-drive'
+    | '/drive/__drive/recent'
+    | '/drive/__drive/stars'
+    | '/drive/__drive/'
+    | '/drive/__drive/folder/$folderid/flow'
+    | '/drive/__drive/file/$fileId/'
+    | '/drive/__drive/folder/$folderid/'
+    | '/drive/__drive/shared/$token/'
+    | '/drive/__drive/shared/$token/file/$fileId'
+    | '/drive/__drive/shared/$token/folder/$folderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  ApiJwksRoute: typeof ApiJwksRoute
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+  Drive_driveRoute: typeof Drive_driveRouteWithChildren
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +286,170 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/drive/__drive': {
+      id: '/drive/__drive'
+      path: '/drive'
+      fullPath: '/drive'
+      preLoaderRoute: typeof Drive_driveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/auth/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/jwks': {
+      id: '/api/jwks'
+      path: '/api/jwks'
+      fullPath: '/api/jwks'
+      preLoaderRoute: typeof ApiJwksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/drive/__drive/': {
+      id: '/drive/__drive/'
+      path: '/'
+      fullPath: '/drive/'
+      preLoaderRoute: typeof Drive_driveIndexRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/stars': {
+      id: '/drive/__drive/stars'
+      path: '/stars'
+      fullPath: '/drive/stars'
+      preLoaderRoute: typeof Drive_driveStarsRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/recent': {
+      id: '/drive/__drive/recent'
+      path: '/recent'
+      fullPath: '/drive/recent'
+      preLoaderRoute: typeof Drive_driveRecentRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/my-drive': {
+      id: '/drive/__drive/my-drive'
+      path: '/my-drive'
+      fullPath: '/drive/my-drive'
+      preLoaderRoute: typeof Drive_driveMyDriveRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/bin': {
+      id: '/drive/__drive/bin'
+      path: '/bin'
+      fullPath: '/drive/bin'
+      preLoaderRoute: typeof Drive_driveBinRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/drive/__drive/shared/$token/': {
+      id: '/drive/__drive/shared/$token/'
+      path: '/shared/$token'
+      fullPath: '/drive/shared/$token/'
+      preLoaderRoute: typeof Drive_driveSharedTokenIndexRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/folder/$folderid/': {
+      id: '/drive/__drive/folder/$folderid/'
+      path: '/folder/$folderid'
+      fullPath: '/drive/folder/$folderid/'
+      preLoaderRoute: typeof Drive_driveFolderFolderidIndexRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/file/$fileId/': {
+      id: '/drive/__drive/file/$fileId/'
+      path: '/file/$fileId'
+      fullPath: '/drive/file/$fileId/'
+      preLoaderRoute: typeof Drive_driveFileFileIdIndexRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/folder/$folderid/flow': {
+      id: '/drive/__drive/folder/$folderid/flow'
+      path: '/folder/$folderid/flow'
+      fullPath: '/drive/folder/$folderid/flow'
+      preLoaderRoute: typeof Drive_driveFolderFolderidFlowRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/shared/$token/folder/$folderId': {
+      id: '/drive/__drive/shared/$token/folder/$folderId'
+      path: '/shared/$token/folder/$folderId'
+      fullPath: '/drive/shared/$token/folder/$folderId'
+      preLoaderRoute: typeof Drive_driveSharedTokenFolderFolderIdRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
+    '/drive/__drive/shared/$token/file/$fileId': {
+      id: '/drive/__drive/shared/$token/file/$fileId'
+      path: '/shared/$token/file/$fileId'
+      fullPath: '/drive/shared/$token/file/$fileId'
+      preLoaderRoute: typeof Drive_driveSharedTokenFileFileIdRouteImport
+      parentRoute: typeof Drive_driveRoute
+    }
   }
 }
 
+interface Drive_driveRouteChildren {
+  Drive_driveBinRoute: typeof Drive_driveBinRoute
+  Drive_driveMyDriveRoute: typeof Drive_driveMyDriveRoute
+  Drive_driveRecentRoute: typeof Drive_driveRecentRoute
+  Drive_driveStarsRoute: typeof Drive_driveStarsRoute
+  Drive_driveIndexRoute: typeof Drive_driveIndexRoute
+  Drive_driveFolderFolderidFlowRoute: typeof Drive_driveFolderFolderidFlowRoute
+  Drive_driveFileFileIdIndexRoute: typeof Drive_driveFileFileIdIndexRoute
+  Drive_driveFolderFolderidIndexRoute: typeof Drive_driveFolderFolderidIndexRoute
+  Drive_driveSharedTokenIndexRoute: typeof Drive_driveSharedTokenIndexRoute
+  Drive_driveSharedTokenFileFileIdRoute: typeof Drive_driveSharedTokenFileFileIdRoute
+  Drive_driveSharedTokenFolderFolderIdRoute: typeof Drive_driveSharedTokenFolderFolderIdRoute
+}
+
+const Drive_driveRouteChildren: Drive_driveRouteChildren = {
+  Drive_driveBinRoute: Drive_driveBinRoute,
+  Drive_driveMyDriveRoute: Drive_driveMyDriveRoute,
+  Drive_driveRecentRoute: Drive_driveRecentRoute,
+  Drive_driveStarsRoute: Drive_driveStarsRoute,
+  Drive_driveIndexRoute: Drive_driveIndexRoute,
+  Drive_driveFolderFolderidFlowRoute: Drive_driveFolderFolderidFlowRoute,
+  Drive_driveFileFileIdIndexRoute: Drive_driveFileFileIdIndexRoute,
+  Drive_driveFolderFolderidIndexRoute: Drive_driveFolderFolderidIndexRoute,
+  Drive_driveSharedTokenIndexRoute: Drive_driveSharedTokenIndexRoute,
+  Drive_driveSharedTokenFileFileIdRoute: Drive_driveSharedTokenFileFileIdRoute,
+  Drive_driveSharedTokenFolderFolderIdRoute:
+    Drive_driveSharedTokenFolderFolderIdRoute,
+}
+
+const Drive_driveRouteWithChildren = Drive_driveRoute._addFileChildren(
+  Drive_driveRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  ApiJwksRoute: ApiJwksRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  Drive_driveRoute: Drive_driveRouteWithChildren,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
