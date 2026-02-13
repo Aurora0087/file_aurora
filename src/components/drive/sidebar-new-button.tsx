@@ -59,7 +59,7 @@ export function SidebarNewButton() {
     try {
       // 1. Get Pre-signed URL
       const { data } = await axios.post(
-        `${process.env.BUN_SERVER_URL || 'http://localhost:8888/api/v1'}/file/presign-url`,
+        `${process.env.BUN_SERVER_URL}/file/presign-url`,
         {
           fileName: file.name,
           fileType: file.type,
@@ -86,7 +86,7 @@ export function SidebarNewButton() {
 
       // 3. Finish Upload
       await axios.post(
-        `${process.env.BUN_SERVER_URL || 'http://localhost:8888/api/v1'}/file/finish-upload`,
+        `${process.env.BUN_SERVER_URL}/file/finish-upload`,
         {
           name: file.name,
           parentId: targetFolderId as Id<'driveItems'>,
