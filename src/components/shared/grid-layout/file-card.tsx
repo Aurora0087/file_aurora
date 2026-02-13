@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useNavigate } from '@tanstack/react-router'
 import { truncateName } from '@/lib/utils'
-import SmartFilePreview from '@/components/drive/grid-layout/SmartFilePreview'
+import { SmartFilePreview } from "@/components/drive/grid-layout/SmartFilePreview"
 
 function FileCard({
   name,
