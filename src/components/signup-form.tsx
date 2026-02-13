@@ -1,9 +1,9 @@
-import * as React from 'react'
-import { useForm } from '@tanstack/react-form'
-import { toast } from 'sonner'
-import * as z from 'zod'
+import * as React from "react"
+import { useForm } from "@tanstack/react-form"
+import { toast } from "sonner"
+import * as z from "zod"
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -11,45 +11,47 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from "@/components/ui/card"
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { IconBrandGoogle, IconLoader2 } from '@tabler/icons-react'
-import { useNavigate, Link } from '@tanstack/react-router'
-import { authClient } from '@/lib/auth-client'
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { 
+  IconBrandGoogle, 
+  IconLoader2, 
+  IconEye, 
+  IconEyeOff 
+} from "@tabler/icons-react"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { authClient } from "@/lib/auth-client"
 
-// 1. Zod Schema
-const signupSchema = z
-  .object({
-    name: z.string().min(2, 'Name must be at least 2 characters.'),
-    email: z.string().email('Please enter a valid email address.'),
-    password: z.string().min(8, 'Password must be at least 8 characters.'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match.',
-    path: ['confirmPassword'],
-  })
+const signupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters."),
+  email: z.string().email("Please enter a valid email address."),
+  password: z.string().min(8, "Password must be at least 8 characters."),
+  confirmPassword: z.string().min(1, "Please confirm your password."),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
+});
 
-export function SignupForm({
-  className,
-  ...props
-}: React.ComponentProps<'form'>) {
+export function SignupForm() {
   const navigate = useNavigate()
+  const [isGoogleLoading, setIsGoogleLoading] = React.useState(false)
+  
+  // 1. States for toggling visibility
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
 
-  // 1. State for form fields
   const form = useForm({
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
     validators: {
       onSubmit: signupSchema,
@@ -59,164 +61,129 @@ export function SignupForm({
         email: value.email,
         password: value.password,
         name: value.name,
-        callbackURL: '/dashboard',
+        callbackURL: "/drive/my-drive",
       })
 
       if (error) {
-        toast.error('Sign up failed', {
-          description: error.message || 'Something went wrong.',
-        })
+        toast.error("Signup failed", { description: error.message })
       } else {
-        toast.success('Account created successfully!')
+        toast.success("Account created successfully!")
         navigate({ to: '/drive/my-drive' })
       }
     },
   })
 
-  const handleGoogleSignUp = async () => {
-    await authClient.signIn.social({
-      provider: 'google',
-      callbackURL: '/dashboard',
-    })
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true)
+    try {
+      await authClient.signIn.social({ provider: "google", callbackURL: "/drive/my-drive" })
+    } finally {
+      setIsGoogleLoading(false)
+    }
   }
 
+  const isLoading = form.state.isSubmitting || isGoogleLoading
+
   return (
-    <Card className=' md:min-w-84 ring-0 bg-transparent'>
-      <CardHeader className=' text-center'>
-        <CardTitle className='text-2xl font-bold'>Create your account</CardTitle>
-        <CardDescription className=' text-muted-foreground text-sm text-balance'>
-          Fill in the form below to create your account
+    <Card className="md:min-w-84 ring-0 bg-transparent border-none shadow-none">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+        <CardDescription className="text-muted-foreground text-sm">
+          Enter your details to get started.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        <form
-          id="signup-form"
-          onSubmit={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            form.handleSubmit()
-          }}
-        >
+        <form id="signup-form" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }}>
           <FieldGroup>
-            {/* Full Name */}
+            {/* Name & Email (Omitted for brevity, same as before) */}
             <form.Field
               name="name"
-              children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="John Doe"
-                      required
-                    />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                )
-              }}
+              children={(field) => (
+                <Field data-invalid={field.state.meta.isTouched && !field.state.meta.isValid}>
+                  <FieldLabel>Full Name</FieldLabel>
+                  <Input placeholder="John Doe" value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} disabled={isLoading} />
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
             />
 
-            {/* Email */}
             <form.Field
               name="email"
-              children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="email"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="m@example.com"
-                      required
-                    />
-                    <FieldDescription>
-                      We'll use this to contact you. We will not share your email with anyone else.
-                    </FieldDescription>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                )
-              }}
+              children={(field) => (
+                <Field data-invalid={field.state.meta.isTouched && !field.state.meta.isValid}>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input type="email" placeholder="m@example.com" value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} disabled={isLoading} />
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
             />
 
-            {/* Password */}
+            {/* Password Field with Toggle */}
             <form.Field
               name="password"
-              children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+              children={(field) => (
+                <Field data-invalid={field.state.meta.isTouched && !field.state.meta.isValid}>
+                  <FieldLabel>Password</FieldLabel>
+                  <div className="relative">
                     <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
+                      type={showPassword ? "text" : "password"}
+                      className="pr-10" // Add padding to the right so text doesn't go under the icon
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      required
+                      disabled={isLoading}
                     />
-                    <FieldDescription>
-                      Must be at last 8 charecters long.
-                    </FieldDescription>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                )
-              }}
+                    <button
+                      type="button" // Important: prevents form submission
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                    </button>
+                  </div>
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
             />
 
-            {/* Confirm Password */}
+            {/* Confirm Password Field with Toggle */}
             <form.Field
               name="confirmPassword"
-              children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Confirm Password</FieldLabel>
+              children={(field) => (
+                <Field data-invalid={field.state.meta.isTouched && !field.state.meta.isValid}>
+                  <FieldLabel>Confirm Password</FieldLabel>
+                  <div className="relative">
                     <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      className="pr-10"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      required
+                      disabled={isLoading}
                     />
-                    <FieldDescription>
-                      Please confirm your password.
-                    </FieldDescription>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                )
-              }}
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showConfirmPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                    </button>
+                  </div>
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
             />
           </FieldGroup>
         </form>
 
+        {/* Google button (same as before) */}
         <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-[.7rem] uppercase">
-            <span className="text-muted-foreground px-2">Or continue with</span>
-          </div>
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background text-muted-foreground px-2">Or continue with</span></div>
         </div>
 
-        <Button variant="outline" type="button" onClick={handleGoogleSignUp} className="w-full">
-          <IconBrandGoogle className="mr-2 h-4 w-4" />
+        <Button variant="outline" type="button" onClick={handleGoogleLogin} className="w-full" disabled={isLoading}>
+          {isGoogleLoading ? <IconLoader2 className="mr-2 h-4 w-4 animate-spin" /> : <IconBrandGoogle className="mr-2 h-4 w-4" />}
           Google
         </Button>
       </CardContent>
@@ -225,22 +192,14 @@ export function SignupForm({
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <Button 
-              type="submit" 
-              form="signup-form" 
-              className="w-full" 
-              disabled={!canSubmit}
-            >
+            <Button type="submit" form="signup-form" className="w-full" disabled={!canSubmit || isLoading}>
               {isSubmitting && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
           )}
         />
-        <p className="text-muted-foreground text-center text-sm">
-          Already have an account?{" "}
-          <Link to="/auth/login" className="text-primary underline underline-offset-4">
-            Sign in
-          </Link>
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account? <Link to="/auth/login" className="text-primary underline underline-offset-4">Log in</Link>
         </p>
       </CardFooter>
     </Card>

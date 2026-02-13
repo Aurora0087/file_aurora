@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { toast } from "sonner"
@@ -22,11 +20,10 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { IconBrandGoogle, IconLoader2 } from "@tabler/icons-react"
+import { IconBrandGoogle, IconLoader2, IconEye, IconEyeOff } from "@tabler/icons-react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { authClient } from "@/lib/auth-client"
 
-// 1. Define the Validation Schema
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(1, "Password is required."),
@@ -34,8 +31,10 @@ const loginSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate()
+  const [isGoogleLoading, setIsGoogleLoading] = React.useState(false)
+  // 1. Add state for password visibility
+  const [showPassword, setShowPassword] = React.useState(false)
 
-  // 2. Initialize TanStack Form
   const form = useForm({
     defaultValues: {
       email: "",
@@ -57,22 +56,37 @@ export function LoginForm() {
         })
       } else {
         toast.success("Welcome back!")
-         navigate({ to: '/drive/my-drive' })
+        navigate({ to: '/drive/my-drive' })
       }
     },
   })
 
-  // Handle Google Login (independent of the email form)
   const handleGoogleLogin = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/drive/my-drive",
-    })
+    setIsGoogleLoading(true)
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/drive/my-drive",
+      })
+
+      if (error) {
+        toast.error("Google login failed", {
+          description: error.message || "Could not connect to Google.",
+        })
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred during Google login.")
+    } finally {
+      setIsGoogleLoading(false)
+    }
   }
 
+  // Helper to determine if interaction should be blocked
+  const isLoading = form.state.isSubmitting || isGoogleLoading
+
   return (
-   <Card className=' md:min-w-84 ring-0 bg-transparent'>
-         <CardHeader className=' text-center'>
+    <Card className=' md:min-w-84 ring-0 bg-transparent'>
+      <CardHeader className=' text-center'>
         <CardTitle className='text-2xl font-bold'>Login to your account</CardTitle>
         <CardDescription className=' text-muted-foreground text-sm text-balance'>
           Enter your credentials to access your files.
@@ -106,6 +120,7 @@ export function LoginForm() {
                       aria-invalid={isInvalid}
                       placeholder="m@example.com"
                       autoComplete="email"
+                      disabled={isLoading}
                     />
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
@@ -113,7 +128,7 @@ export function LoginForm() {
               }}
             />
 
-            {/* Password Field */}
+            {/* Password Field with Toggle */}
             <form.Field
               name="password"
               children={(field) => {
@@ -129,16 +144,38 @@ export function LoginForm() {
                         Forgot your password?
                       </Link>
                     </div>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      autoComplete="current-password"
-                    />
+                    {/* 2. Wrap input in relative container */}
+                    <div className="relative">
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        // 3. Dynamic type based on state
+                        type={showPassword ? "text" : "password"}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        autoComplete="current-password"
+                        disabled={isLoading}
+                        className="pr-10" // Space for the icon
+                      />
+                      {/* 4. Show/Hide Button */}
+                      <button
+                        type="button" // Important: Prevents form submission
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                      >
+                        {showPassword ? (
+                          <IconEyeOff size={18} aria-hidden="true" />
+                        ) : (
+                          <IconEye size={18} aria-hidden="true" />
+                        )}
+                        <span className="sr-only">
+                          {showPassword ? "Hide password" : "Show password"}
+                        </span>
+                      </button>
+                    </div>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 )
@@ -163,8 +200,13 @@ export function LoginForm() {
           type="button" 
           onClick={handleGoogleLogin} 
           className="w-full"
+          disabled={isLoading}
         >
-          <IconBrandGoogle className="mr-2 h-4 w-4" />
+          {isGoogleLoading ? (
+            <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <IconBrandGoogle className="mr-2 h-4 w-4" />
+          )}
           Google
         </Button>
       </CardContent>
@@ -177,7 +219,7 @@ export function LoginForm() {
               type="submit" 
               form="login-form" 
               className="w-full" 
-              disabled={!canSubmit}
+              disabled={!canSubmit || isLoading}
             >
               {isSubmitting && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
               Login

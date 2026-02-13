@@ -12,6 +12,7 @@ import type * as activity from "../activity.js";
 import type * as auth from "../auth.js";
 import type * as drive from "../drive.js";
 import type * as http from "../http.js";
+import type * as s3Actions from "../s3Actions.js";
 
 import type {
   ApiFromModules,
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   drive: typeof drive;
   http: typeof http;
+  s3Actions: typeof s3Actions;
 }>;
 
 /**

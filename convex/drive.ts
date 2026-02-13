@@ -4,8 +4,8 @@ import { authComponent } from './auth'
 import { paginationOptsValidator } from 'convex/server'
 import { Doc, Id } from './_generated/dataModel'
 
-const S3_HOSTNAME = 'http://localhost:4566'
-const BUCKET_NAME = 'my-local-drive'
+const S3_HOSTNAME = process.env.S3_HOSTNAME||'http://localhost:4566'
+const BUCKET_NAME = process.env.BUCKET_NAME||'my-local-drive'
 
 const FREE_GB_IN_BYTES = 10 * 1024 * 1024 * 1024
 
@@ -305,12 +305,6 @@ export const list = query({
 
     return {
       ...results,
-      page: results.page.map((item) => ({
-        ...item,
-        thumbnailUrl: item.storageKey
-          ? `${S3_HOSTNAME}/${BUCKET_NAME}/${item.thumbnailUrl}`
-          : null,
-      })),
     }
   },
 })
@@ -375,7 +369,7 @@ export const getDirectoryContents = query({
         name: f.name,
         mimeType: f.mimeType,
         size: f.size,
-        thumbnailUrl: `${S3_HOSTNAME}/${BUCKET_NAME}/${f.thumbnailUrl}`,
+        thumbnailUrl: f.thumbnailUrl,
         isStarred: f.isStarred,
         isPublic: f.isPublic,
       }))
@@ -440,26 +434,18 @@ export const getFileDetails = query({
     return {
       file: {
         ...file,
-        url: `${S3_HOSTNAME}/${BUCKET_NAME}/${file.storageKey}`,
+        url: file.storageKey,
         // Note: Thumbnail might already be a full URL if saved by the worker,
         // but we handle both cases here.
-        thumbnail: file.thumbnailUrl?.startsWith('http')
-          ? file.thumbnailUrl
-          : file.thumbnailUrl
-            ? `${S3_HOSTNAME}/${BUCKET_NAME}/${file.thumbnailUrl}`
-            : null,
+        thumbnail: file.thumbnailUrl,
       },
       parent: parentDetails,
       versions: versions
         .filter((v) => !v.isDeleted) // Don't show binned versions
         .map((v) => ({
           ...v,
-          url: `${S3_HOSTNAME}/${BUCKET_NAME}/${v.storageKey}`,
-          thumbnail: v.thumbnailUrl?.startsWith('http')
-            ? v.thumbnailUrl
-            : v.thumbnailUrl
-              ? `${S3_HOSTNAME}/${BUCKET_NAME}/${v.thumbnailUrl}`
-              : null,
+          url: v.storageKey,
+          thumbnail: v.thumbnailUrl,
         })),
     }
   },
@@ -559,13 +545,6 @@ export const recentOpendList = query({
 
     return {
       ...results,
-      page: results.page.map((item) => ({
-        ...item,
-        // If it's a file and has a storageKey, prepend the LocalStack URL
-        thumbnail: item.storageKey
-          ? `${S3_HOSTNAME}/${BUCKET_NAME}/${item.thumbnailUrl}`
-          : null,
-      })),
     }
   },
 })
@@ -592,13 +571,6 @@ export const startedList = query({
 
     return {
       ...results,
-      page: results.page.map((item) => ({
-        ...item,
-        // If it's a file and has a storageKey, prepend the LocalStack URL
-        thumbnailUrl: item.storageKey
-          ? `${S3_HOSTNAME}/${BUCKET_NAME}/${item.thumbnailUrl}`
-          : null,
-      })),
     }
   },
 })
@@ -620,13 +592,6 @@ export const binnedList = query({
 
     return {
       ...results,
-      page: results.page.map((item) => ({
-        ...item,
-        // If it's a file and has a storageKey, prepend the LocalStack URL
-        thumbnailUrl: item.storageKey
-          ? `${S3_HOSTNAME}/${BUCKET_NAME}/${item.thumbnailUrl}`
-          : null,
-      })),
     }
   },
 })

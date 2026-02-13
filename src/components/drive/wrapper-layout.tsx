@@ -42,8 +42,7 @@ function DriveWrapperLayout({
   children: React.ReactNode
   folderid?: string
 }) {
-
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   // Refs for hidden inputs
   const fileInputRef = useRef<HTMLInputElement>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
@@ -62,96 +61,114 @@ function DriveWrapperLayout({
   const [isChordActive, setIsChordActive] = useState(false)
   const chordTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // single file upload
+  const processSingleFileUpload = async (
+    file: File,
+    targetFolderId?: string,
+  ) => {
+    setUploadingFile((prev) => [...prev, { fileName: file.name, progress: 0 }])
+
+    try {
+      // 1. Get Pre-signed URL
+      const { data } = await axios.post(
+        `${process.env.BUN_SERVER_URL || 'http://localhost:8888/api/v1'}/file/presign-url`,
+        {
+          fileName: file.name,
+          fileType: file.type,
+          parentId: targetFolderId, // Use the specific folder ID created during recursion
+          fileSize: file.size || 0,
+        },
+        { withCredentials: true },
+      )
+
+      const { uploadUrl, storageKey } = data
+
+      // 2. S3 Put
+      await axios.put(uploadUrl, file, {
+        headers: { 'Content-Type': file.type },
+        onUploadProgress: (p) => {
+          const progress = Math.round((p.loaded * 100) / (p.total || file.size))
+          setUploadingFile((prev) =>
+            prev.map((f) =>
+              f.fileName === file.name ? { ...f, progress } : f,
+            ),
+          )
+        },
+      })
+
+      // 3. Finish Upload
+      await axios.post(
+        `${process.env.BUN_SERVER_URL || 'http://localhost:8888/api/v1'}/file/finish-upload`,
+        {
+          name: file.name,
+          parentId: targetFolderId as Id<'driveItems'>,
+          storageKey,
+          size: file.size,
+          mimeType: file.type,
+        },
+        { withCredentials: true },
+      )
+      toast.success(`${file.name} uploaded`)
+    } catch (error) {
+      toast.error(`Failed: ${file.name}`)
+    } finally {
+      setTimeout(() => {
+        setUploadingFile((prev) => prev.filter((f) => f.fileName !== file.name))
+      }, 2000)
+    }
+  }
+
+  // upload folder upload
+  const handleFolderUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    const fileArray = Array.from(files)
+
+    // Map to keep track of folder paths to Convex IDs
+    // e.g., {"folder1": "id123", "folder1/sub": "id456"}
+    const folderCache: Record<string, string> = {}
+
+    for (const file of fileArray) {
+      // webkitRelativePath looks like: "MyDocuments/Images/photo.jpg"
+      const pathParts = file.webkitRelativePath.split('/')
+      const fileName = pathParts.pop() // Remove the file name
+      const folders = pathParts // These are the directory names
+
+      let currentParentId = folderid // Start at the current folder view
+
+      // Traverse/Create the folder structure
+      let pathKey = ''
+      for (const folderName of folders) {
+        pathKey = pathKey ? `${pathKey}/${folderName}` : folderName
+
+        if (!folderCache[pathKey]) {
+          // Create folder in Convex
+          const newFolderId = await createFolder({
+            name: folderName,
+            parentId: currentParentId as Id<'driveItems'>,
+            color: 'current',
+          })
+          folderCache[pathKey] = newFolderId
+        }
+        currentParentId = folderCache[pathKey]
+      }
+
+      // Now upload the file into the deepest folder created
+      await processSingleFileUpload(file, currentParentId)
+    }
+
+    if (folderInputRef.current) folderInputRef.current.value = ''
+  }
+
   // 1. Mock Upload Function
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return
-
     const fileArray = Array.from(files)
 
-    // clear inputs
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    if (folderInputRef.current) folderInputRef.current.value = ''
-
     for (const file of fileArray) {
-      setUploadingFile((prev) => [
-        ...prev,
-        { fileName: file.name, progress: 0 },
-      ])
-
-      try {
-        // 1. Get Pre-signed URL from Express using Axios
-        const { data } = await axios.post(
-          `${process.env.BUN_SERVER_URL || 'http://localhost:8888/api/v1'}/file/presign-url`,
-          {
-            fileName: file.name,
-            fileType: file.type,
-            parentId: folderid || undefined,
-            fileSize: file.size || 0,
-          },
-          {
-            withCredentials: true,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        )
-
-        const { uploadUrl, storageKey } = data
-
-        // 2. Upload directly to S3/LocalStack using Axios
-        // We use a fresh axios instance to avoid sending your API cookies to S3
-        await axios.put(uploadUrl, file, {
-          headers: { 'Content-Type': file.type },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / (progressEvent.total || file.size),
-            )
-
-            setUploadingFile((prev) =>
-              prev.map((f) =>
-                f.fileName === file.name
-                  ? { ...f, progress: percentCompleted }
-                  : f,
-              ),
-            )
-          },
-        })
-
-        // 3. Save to Convex
-
-        await axios.post(
-          `${process.env.BUN_SERVER_URL || 'http://localhost:8888/api/v1'}/file/finish-upload`,
-          {
-            name: file.name,
-            parentId: folderid ? (folderid as Id<'driveItems'>) : undefined,
-            storageKey: storageKey,
-            size: file.size,
-            mimeType: file.type,
-          },
-          {
-            withCredentials: true,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        )
-
-        toast.success(`${file.name} uploaded successfully`)
-      } catch (error: any) {
-        console.error('Upload error:', error)
-        if (
-          error.response?.status === 403 &&
-          error.response.data.code === 'STORAGE_FULL'
-        ) {
-          //setIsUpgradeModalOpen(true)
-        }
-        const errorMsg = error.response?.data?.message || error.message
-        toast.error(`Failed to upload ${file.name}: ${errorMsg}`)
-      } finally {
-        // Remove from UI after completion
-        setTimeout(() => {
-          setUploadingFile((prev) =>
-            prev.filter((f) => f.fileName !== file.name),
-          )
-        }, 2000)
-      }
+      await processSingleFileUpload(file, folderid)
     }
+
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   // 2. Drag and Drop Handlers
@@ -188,8 +205,11 @@ function DriveWrapperLayout({
     }
   }
 
-  const handelFolderFlow = async () =>{
-    navigate({to:`/drive/folder/$folderid/flow`,params:{folderid:folderid?folderid:'my-drive'}})
+  const handelFolderFlow = async () => {
+    navigate({
+      to: `/drive/folder/$folderid/flow`,
+      params: { folderid: folderid ? folderid : 'my-drive' },
+    })
   }
 
   useEffect(() => {
@@ -320,17 +340,18 @@ function DriveWrapperLayout({
               <Kbd>i</Kbd>
             </KbdGroup>
           </ContextMenuItem>
-          
-          {folderid&&
-          <>
-          <ContextMenuSeparator/>
-          <ContextMenuItem onClick={handelFolderFlow}>
-            <div className="flex gap-2 items-center">
-              <IconActivity className="mr-2 h-4 w-4" />
-              <span>Folder Trigger-Actions</span>
-            </div>
-          </ContextMenuItem>
-          </>}
+
+          {folderid && (
+            <>
+              <ContextMenuSeparator />
+              <ContextMenuItem onClick={handelFolderFlow}>
+                <div className="flex gap-2 items-center">
+                  <IconActivity className="mr-2 h-4 w-4" />
+                  <span>Folder Trigger-Actions</span>
+                </div>
+              </ContextMenuItem>
+            </>
+          )}
         </ContextMenuContent>
       </ContextMenu>
 
@@ -349,7 +370,7 @@ function DriveWrapperLayout({
         webkitdirectory=""
         directory=""
         multiple
-        onChange={(e) => handleFileUpload(e.target.files)}
+        onChange={(e) => handleFolderUpload(e.target.files)}
       />
 
       {/* Uploading Status Bar (Bottom of screen) */}

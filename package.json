@@ -12,6 +12,7 @@
     "check": "prettier --write . && eslint --fix"
   },
   "dependencies": {
+    "@aws-sdk/cloudfront-signer": "^3.988.0",
     "@base-ui/react": "^1.1.0",
     "@convex-dev/better-auth": "^0.10.10",
     "@convex-dev/react-query": "^0.1.0",
