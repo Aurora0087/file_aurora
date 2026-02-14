@@ -6,6 +6,7 @@ import { components } from './_generated/api'
 import { query } from './_generated/server'
 import type { GenericCtx } from '@convex-dev/better-auth'
 import type { DataModel } from './_generated/dataModel'
+import { domain } from 'node_modules/zod/v4/core/regexes.d.cts'
 
 const siteUrl = process.env.SITE_URL!
 
@@ -32,6 +33,17 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       // The Convex plugin is required for Convex compatibility
       convex({ authConfig }),
     ],
+    advanced:{
+      // Cross Subdomain Cookies for backend
+      crossSubDomainCookies: {
+            enabled: true,
+            domain: "file.aurora.backend.blueauroralabs.com",
+        },
+        trustedOrigins: [
+        'https://file.aurora.backend.blueauroralabs.com',
+        'https://fileaurora.blueauroralabs.com',
+    ],
+    }
   })
 }
 
