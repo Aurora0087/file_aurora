@@ -45,7 +45,7 @@ function RouteComponent() {
       // This sends the keys to your RabbitMQ worker for physical deletion
       if (s3Keys.length > 0) {
         await axios.post(
-          `${process.env.BUN_SERVER_URL || 'http://localhost:8888/api/v1'}/file/bulk-delete`,
+          `${import.meta.env.VITE_BUN_SERVER_PUBLIC_URL || 'http://localhost:8888/api/v1'}/file/bulk-delete`,
           {
             storageKeys: s3Keys,
           },

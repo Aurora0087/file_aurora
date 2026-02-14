@@ -36,7 +36,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       // Cross Subdomain Cookies for backend
       crossSubDomainCookies: {
             enabled: true,
-            domain: "file.aurora.backend.blueauroralabs.com",
+            domain: ".blueauroralabs.com",
         },
         trustedOrigins: [
         'https://file.aurora.backend.blueauroralabs.com',

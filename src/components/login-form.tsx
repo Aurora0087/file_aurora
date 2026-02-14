@@ -80,8 +80,6 @@ export function LoginForm() {
       setIsGoogleLoading(false)
     }
   }
-
-  console.log(import.meta.env.VITE_BUN_SERVER_PUBLIC_URL);
   
 
   // Helper to determine if interaction should be blocked
