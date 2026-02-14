@@ -6,7 +6,6 @@ import { components } from './_generated/api'
 import { query } from './_generated/server'
 import type { GenericCtx } from '@convex-dev/better-auth'
 import type { DataModel } from './_generated/dataModel'
-import { domain } from 'node_modules/zod/v4/core/regexes.d.cts'
 
 const siteUrl = process.env.SITE_URL!
 
